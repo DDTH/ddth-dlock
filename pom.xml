@@ -1,0 +1,126 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+
+	<modelVersion>4.0.0</modelVersion>
+
+	<parent>
+		<groupId>com.github.ddth</groupId>
+		<artifactId>ddth-parent</artifactId>
+		<version>6</version>
+	</parent>
+
+	<groupId>com.github.ddth</groupId>
+	<artifactId>ddth-dlock</artifactId>
+	<version>0.6.3.3-SNAPSHOT</version>
+	<packaging>pom</packaging>
+
+	<name>ddth-dlock</name>
+	<description>DDTH's Distributed Lock library</description>
+	<url>https://github.com/DDTH/ddth-dlock</url>
+
+	<modules>
+		<module>ddth-dlock-core</module>
+		<module>ddth-dlock-redis</module>
+	</modules>
+
+	<licenses>
+		<license>
+			<name>The MIT License (MIT)</name>
+			<url>http://opensource.org/licenses/MIT</url>
+			<distribution>repo</distribution>
+		</license>
+	</licenses>
+
+	<scm>
+		<url>git@github.com:DDTH/ddth-dlock</url>
+		<connection>scm:git:git@github.com:DDTH/ddth-dlock</connection>
+		<developerConnection>scm:git:git@github.com:DDTH/ddth-dlock</developerConnection>
+	</scm>
+	<developers>
+		<developer>
+			<id>btnguyen2k</id>
+			<name>Thanh Ba Nguyen</name>
+			<email>btnguyen2k@gmail.com</email>
+		</developer>
+	</developers>
+
+	<properties>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+		<skipTests>true</skipTests>
+
+		<version.ddth_commons>0.7.1.1</version.ddth_commons>
+		<version.jedis>2.9.0</version.jedis>
+	</properties>
+
+	<repositories>
+		<repository>
+			<id>sonatype-org</id>
+			<name>Sonatype Releases</name>
+			<url>http://oss.sonatype.org/content/repositories/releases/</url>
+		</repository>
+	</repositories>
+
+	<dependencies>
+		<dependency>
+			<groupId>junit</groupId>
+			<artifactId>junit</artifactId>
+			<version>4.11</version>
+			<scope>test</scope>
+			<!-- <exclusions> <exclusion> <groupId>org.slf4j</groupId> <artifactId>slf4j-simple</artifactId> 
+				</exclusion> </exclusions> -->
+		</dependency>
+		<dependency>
+			<groupId>org.slf4j</groupId>
+			<artifactId>log4j-over-slf4j</artifactId>
+			<version>1.7.25</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.slf4j</groupId>
+			<artifactId>slf4j-simple</artifactId>
+			<version>1.7.25</version>
+			<scope>test</scope>
+		</dependency>
+
+		<dependency>
+			<groupId>com.github.ddth</groupId>
+			<artifactId>ddth-commons-core</artifactId>
+			<version>${version.ddth_commons}</version>
+		</dependency>
+
+		<!-- for Redis-based locks -->
+		<dependency>
+			<groupId>redis.clients</groupId>
+			<artifactId>jedis</artifactId>
+			<version>${version.jedis}</version>
+			<optional>true</optional>
+		</dependency>
+	</dependencies>
+
+	<build>
+		<plugins>
+			<plugin>
+				<artifactId>maven-surefire-plugin</artifactId>
+				<configuration>
+					<!-- Parallel Test Execution -->
+					<forkCount>4</forkCount>
+					<reuseForks>true</reuseForks>
+					<parallel>suites</parallel>
+					<useUnlimitedThreads>true</useUnlimitedThreads>
+
+					<skipTests>${skipTests}</skipTests>
+					<systemPropertyVariables>
+						<!-- <log4j.configuration>file:${basedir}/../etc/log4j.xml</log4j.configuration> -->
+					</systemPropertyVariables>
+				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-javadoc-plugin</artifactId>
+				<version>2.10.4</version>
+				<configuration>
+					<additionalparam>-Xdoclint:none</additionalparam>
+				</configuration>
+			</plugin>
+		</plugins>
+	</build>
+</project>
