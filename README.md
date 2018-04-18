@@ -19,7 +19,7 @@ Third party libraries are distributed under their own licenses.
 
 ## Installation
 
-Latest release version: `0.1.0`. See [RELEASE-NOTES.md](RELEASE-NOTES.md).
+Latest release version: `0.1.1`. See [RELEASE-NOTES.md](RELEASE-NOTES.md).
 
 Maven dependency: if only a sub-set of `ddth-dlock` functionality is used, choose the corresponding
 dependency artifact(s) to reduce the number of unused jar files.
@@ -30,7 +30,7 @@ dependency artifact(s) to reduce the number of unused jar files.
 <dependency>
 	<groupId>com.github.ddth</groupId>
 	<artifactId>ddth-dlock-core</artifactId>
-	<version>0.1.0</version>
+	<version>0.1.1</version>
 </dependency>
 ```
 
@@ -40,7 +40,7 @@ dependency artifact(s) to reduce the number of unused jar files.
 <dependency>
     <groupId>com.github.ddth</groupId>
     <artifactId>ddth-dlock-redis</artifactId>
-    <version>0.1.0</version>
+    <version>0.1.1</version>
     <type>pom</type>
 </dependency>
 ```
@@ -56,8 +56,8 @@ This library is a simple distributed implementation:
 Notes:
 
 - Two threads or processes can hold a same lock if they use the same client-id.
-- Lock can be hold for a specific duration. When the duration has pass, lock is expired.
-Call method `lock(...)` again before expired time to renew the lock.
+- Lock can be hold for a specific duration. When the duration has passed, lock is expired.
+- Reentrant: call method `lock(...)` again before expired time to renew the lock.
 
 
 ### 1. Obtain the lock factory

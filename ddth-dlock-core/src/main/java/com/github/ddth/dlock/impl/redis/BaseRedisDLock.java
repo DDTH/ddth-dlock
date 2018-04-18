@@ -7,6 +7,8 @@ import org.slf4j.LoggerFactory;
 import com.github.ddth.dlock.IDLock;
 import com.github.ddth.dlock.impl.AbstractDLock;
 
+import redis.clients.jedis.JedisCommands;
+
 /**
  * Base class for <a href="http://redis.io">Redis</a>-based implementations of
  * {@link IDLock}.
@@ -149,4 +151,28 @@ public abstract class BaseRedisDLock extends AbstractDLock {
         this.scriptUnlock = scriptUnlock;
         return this;
     }
+
+    /**
+     * Update current lock's holder info.
+     * 
+     * @param jedisCommands
+     * @since 0.1.1
+     */
+    protected void updateLockHolder(JedisCommands jedisCommands) {
+        String key = getName();
+        String clientId = jedisCommands.get(key);
+        setClientId(clientId);
+        if (!StringUtils.isBlank(clientId)) {
+            Long ttl = jedisCommands.pttl(key);
+            if (ttl != null && ttl.longValue() != -2) {
+                setTimestampExpiry(ttl.longValue() != -1
+                        ? System.currentTimeMillis() + ttl.longValue() : Integer.MAX_VALUE);
+            } else {
+                setTimestampExpiry(Integer.MAX_VALUE);
+            }
+        } else {
+            setTimestampExpiry(0);
+        }
+    }
+
 }

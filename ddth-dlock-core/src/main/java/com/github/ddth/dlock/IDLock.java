@@ -30,6 +30,11 @@ public interface IDLock {
     /**
      * Acquire the lock for {@code clientId} with default duration.
      * 
+     * <p>
+     * Reentrant: lock can be acquired multiple times by the same
+     * {@code clientId}. Lock's expiry will be extended accordingly.
+     * </p>
+     * 
      * @param clientId
      *            within a namespace, only one client is allowed to hold lock as
      *            a given time
@@ -43,6 +48,11 @@ public interface IDLock {
     /**
      * Acquire the lock for {@code clientId} for a duration of
      * {@link lockDurationMs}.
+     * 
+     * <p>
+     * Reentrant: lock can be acquired multiple times by the same
+     * {@code clientId}. Lock's expiry will be extended accordingly.
+     * </p>
      * 
      * @param clientId
      *            within a namespace, only one client is allowed to hold lock as

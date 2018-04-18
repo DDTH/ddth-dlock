@@ -107,8 +107,10 @@ public class ClusteredRedisDLock extends BaseRedisDLock {
         Object response = jedis.eval(getScriptLock(), 0, key, clientId,
                 String.valueOf(lockDurationMs));
         if (response == null) {
+            updateLockHolder(jedis);
             return LockResult.HOLD_BY_ANOTHER_CLIENT;
         } else {
+            updateLockHolder(clientId, lockDurationMs);
             return LockResult.SUCCESSFUL;
         }
     }
