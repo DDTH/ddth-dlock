@@ -5,6 +5,7 @@ import java.util.Properties;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.github.ddth.commons.redis.JedisConnector;
 import com.github.ddth.dlock.IDLockFactory;
 
 import redis.clients.jedis.JedisPool;

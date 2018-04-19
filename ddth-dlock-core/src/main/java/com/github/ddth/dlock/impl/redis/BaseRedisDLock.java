@@ -4,6 +4,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.github.ddth.commons.redis.JedisConnector;
 import com.github.ddth.dlock.IDLock;
 import com.github.ddth.dlock.impl.AbstractDLock;
 

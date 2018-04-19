@@ -3,6 +3,7 @@ package com.github.ddth.dlock.impl.redis;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.github.ddth.commons.redis.JedisConnector;
 import com.github.ddth.dlock.IDLockFactory;
 import com.github.ddth.dlock.impl.AbstractDLockFactory;
 

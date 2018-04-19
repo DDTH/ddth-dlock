@@ -1,4 +1,5 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 
 	<modelVersion>4.0.0</modelVersion>
 
@@ -47,7 +48,7 @@
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<skipTests>true</skipTests>
 
-		<version.ddth_commons>0.7.1.1</version.ddth_commons>
+		<version.ddth_commons>0.9.1</version.ddth_commons>
 		<version.jedis>2.9.0</version.jedis>
 	</properties>
 
@@ -92,6 +93,13 @@
 			<groupId>redis.clients</groupId>
 			<artifactId>jedis</artifactId>
 			<version>${version.jedis}</version>
+			<optional>true</optional>
+		</dependency>
+		<dependency>
+			<groupId>com.github.ddth</groupId>
+			<artifactId>ddth-commons-jedis</artifactId>
+			<version>${version.ddth_commons}</version>
+			<type>pom</type>
 			<optional>true</optional>
 		</dependency>
 	</dependencies>
