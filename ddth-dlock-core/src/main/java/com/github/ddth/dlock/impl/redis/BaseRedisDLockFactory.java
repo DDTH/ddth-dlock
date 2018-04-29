@@ -44,7 +44,7 @@ public abstract class BaseRedisDLockFactory extends AbstractDLockFactory {
     }
 
     /**
-     * @param jedisPool
+     * @param jedisConnector
      * @return
      */
     public BaseRedisDLockFactory setJedisConnector(JedisConnector jedisConnector) {
