@@ -140,7 +140,7 @@ public class RedisDLockFactory extends BaseRedisDLockFactory {
     protected RedisDLock createLockInternal(String name, Properties lockProps) {
         RedisDLock lock = new RedisDLock(name);
         lock.setLockProperties(lockProps);
-        lock.setRedisHostAndPort(redisHostAndPort).setRedisPassword(getRedisPassword());
+        lock.setRedisHostAndPort(getRedisHostAndPort()).setRedisPassword(getRedisPassword());
         lock.setJedisConnector(getJedisConnector());
         return lock;
     }

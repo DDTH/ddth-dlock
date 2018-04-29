@@ -6,6 +6,9 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.github.ddth.dlock.IDLock;
 import com.github.ddth.dlock.IDLockFactory;
 import com.google.common.cache.Cache;
@@ -22,6 +25,8 @@ import com.google.common.cache.RemovalNotification;
  */
 public abstract class AbstractDLockFactory implements IDLockFactory, AutoCloseable {
 
+    private Logger LOGGER = LoggerFactory.getLogger(AbstractDLockFactory.class);
+
     private String lockNamePrefix;
 
     private Map<String, Properties> lockProperties;
@@ -31,7 +36,11 @@ public abstract class AbstractDLockFactory implements IDLockFactory, AutoCloseab
                 @Override
                 public void onRemoval(RemovalNotification<String, AbstractDLock> notification) {
                     AbstractDLock lock = notification.getValue();
-                    lock.destroy();
+                    try {
+                        lock.destroy();
+                    } catch (Exception e) {
+                        LOGGER.warn(e.getMessage(), e);
+                    }
                 }
             }).build();
 

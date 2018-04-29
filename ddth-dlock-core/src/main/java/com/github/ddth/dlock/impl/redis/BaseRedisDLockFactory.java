@@ -57,16 +57,18 @@ public abstract class BaseRedisDLockFactory extends AbstractDLockFactory {
     }
 
     public void destroy() {
-        if (jedisConnector != null && myOwnRedis) {
-            try {
-                jedisConnector.destroy();
-            } catch (Exception e) {
-                LOGGER.warn(e.getMessage(), e);
-            } finally {
-                jedisConnector = null;
+        try {
+            super.destroy();
+        } finally {
+            if (jedisConnector != null && myOwnRedis) {
+                try {
+                    jedisConnector.destroy();
+                } catch (Exception e) {
+                    LOGGER.warn(e.getMessage(), e);
+                } finally {
+                    jedisConnector = null;
+                }
             }
         }
-
-        super.destroy();
     }
 }
