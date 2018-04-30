@@ -4,10 +4,8 @@ import java.util.HashSet;
 import java.util.Properties;
 import java.util.Set;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.github.ddth.commons.redis.JedisConnector;
+import com.github.ddth.commons.redis.JedisUtils;
 import com.github.ddth.dlock.IDLockFactory;
 
 import redis.clients.jedis.HostAndPort;
@@ -23,8 +21,6 @@ import redis.clients.jedis.Protocol;
  * @since 0.1.0
  */
 public class ClusteredRedisDLockFactory extends BaseRedisDLockFactory {
-
-    private final Logger LOGGER = LoggerFactory.getLogger(ClusteredRedisDLockFactory.class);
 
     public final static int DEFAULT_MAX_ATTEMPTS = 3;
 
@@ -101,24 +97,16 @@ public class ClusteredRedisDLockFactory extends BaseRedisDLockFactory {
     }
 
     /**
-     * {@inheritDoc}
+     * {@inheritDocs}
+     * 
+     * @since 0.1.1.2
      */
     @Override
-    public ClusteredRedisDLockFactory init() {
-        super.init();
-
-        if (getJedisConnector() == null) {
-            try {
-                JedisConnector jedisConnector = new JedisConnector();
-                jedisConnector.setRedisHostsAndPorts(redisHostsAndPorts)
-                        .setRedisPassword(getRedisPassword()).init();
-                setJedisConnector(jedisConnector);
-            } catch (Exception e) {
-                LOGGER.warn(e.getMessage(), e);
-            }
-        }
-
-        return this;
+    protected JedisConnector buildJedisConnector() {
+        JedisConnector jedisConnector = new JedisConnector();
+        jedisConnector.setJedisPoolConfig(JedisUtils.defaultJedisPoolConfig())
+                .setRedisHostsAndPorts(redisHostsAndPorts).init();
+        return jedisConnector;
     }
 
     /**

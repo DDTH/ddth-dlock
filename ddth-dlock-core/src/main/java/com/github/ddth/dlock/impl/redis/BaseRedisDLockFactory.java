@@ -56,6 +56,32 @@ public abstract class BaseRedisDLockFactory extends AbstractDLockFactory {
         return this;
     }
 
+    /**
+     * Build a {@link JedisConnector} instance for my own use.
+     * 
+     * @return
+     * @since 0.1.1.2
+     */
+    protected abstract JedisConnector buildJedisConnector();
+
+    /**
+     * {@inheritDoc}
+     * 
+     * @since 0.1.1.2
+     */
+    @Override
+    public BaseRedisDLockFactory init() {
+        if (jedisConnector == null) {
+            jedisConnector = buildJedisConnector();
+            myOwnRedis = jedisConnector != null;
+        }
+        return this;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
     public void destroy() {
         try {
             super.destroy();

@@ -1,10 +1,9 @@
 package com.github.ddth.dlock.impl.redis;
 
 import org.apache.commons.lang3.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import com.github.ddth.commons.redis.JedisConnector;
+import com.github.ddth.commons.redis.JedisUtils;
 import com.github.ddth.dlock.IDLock;
 import com.github.ddth.dlock.LockResult;
 
@@ -18,8 +17,6 @@ import redis.clients.jedis.Protocol;
  * @since 0.1.0
  */
 public class RedisDLock extends BaseRedisDLock {
-
-    private final Logger LOGGER = LoggerFactory.getLogger(RedisDLock.class);
 
     /**
      * To override the {@link #setRedisHostAndPort(String)} setting.
@@ -60,11 +57,23 @@ public class RedisDLock extends BaseRedisDLock {
     }
 
     /**
+     * {@inheritDocs}
+     * 
+     * @since 0.1.1.2
+     */
+    @Override
+    protected JedisConnector buildJedisConnector() {
+        JedisConnector jedisConnector = new JedisConnector();
+        jedisConnector.setJedisPoolConfig(JedisUtils.defaultJedisPoolConfig())
+                .setRedisHostsAndPorts(redisHostAndPort).init();
+        return jedisConnector;
+    }
+
+    /**
      * {@inheritDoc}
      */
     @Override
     public RedisDLock init() {
-        super.init();
 
         /*
          * Parse custom property: redis-host-and-port
@@ -74,15 +83,7 @@ public class RedisDLock extends BaseRedisDLock {
             this.redisHostAndPort = hostAndPort;
         }
 
-        if (getJedisConnector() == null) {
-            try {
-                JedisConnector jedisConnector = new JedisConnector();
-                jedisConnector.setRedisHostsAndPorts(redisHostAndPort).init();
-                setJedisConnector(jedisConnector);
-            } catch (Exception e) {
-                LOGGER.warn(e.getMessage(), e);
-            }
-        }
+        super.init();
 
         return this;
     }

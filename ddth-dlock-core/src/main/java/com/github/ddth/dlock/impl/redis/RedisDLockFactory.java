@@ -2,10 +2,8 @@ package com.github.ddth.dlock.impl.redis;
 
 import java.util.Properties;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.github.ddth.commons.redis.JedisConnector;
+import com.github.ddth.commons.redis.JedisUtils;
 import com.github.ddth.dlock.IDLockFactory;
 
 import redis.clients.jedis.JedisPool;
@@ -20,8 +18,6 @@ import redis.clients.jedis.Protocol;
  * @since 0.1.0
  */
 public class RedisDLockFactory extends BaseRedisDLockFactory {
-
-    private final Logger LOGGER = LoggerFactory.getLogger(RedisDLockFactory.class);
 
     /**
      * Creates a new {@link JedisPool}, with default database and timeout.
@@ -113,24 +109,16 @@ public class RedisDLockFactory extends BaseRedisDLockFactory {
     }
 
     /**
-     * {@inheritDoc}
+     * {@inheritDocs}
+     * 
+     * @since 0.1.1.2
      */
     @Override
-    public RedisDLockFactory init() {
-        super.init();
-
-        if (getJedisConnector() == null) {
-            try {
-                JedisConnector jedisConnector = new JedisConnector();
-                jedisConnector.setRedisHostsAndPorts(redisHostAndPort)
-                        .setRedisPassword(getRedisPassword()).init();
-                setJedisConnector(jedisConnector);
-            } catch (Exception e) {
-                LOGGER.warn(e.getMessage(), e);
-            }
-        }
-
-        return this;
+    protected JedisConnector buildJedisConnector() {
+        JedisConnector jedisConnector = new JedisConnector();
+        jedisConnector.setJedisPoolConfig(JedisUtils.defaultJedisPoolConfig())
+                .setRedisHostsAndPorts(redisHostAndPort).init();
+        return jedisConnector;
     }
 
     /**

@@ -1,5 +1,10 @@
 # ddth-dlock release notes
 
+## 0.1.1.2 - 2018-04-30
+
+- Bug fixes, enhancements & dependency updates.
+
+
 ## 0.1.1.1 - 2018-04-19
 
 - Enhancements & Update dependencies.

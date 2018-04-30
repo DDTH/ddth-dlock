@@ -70,6 +70,14 @@ public abstract class BaseRedisDLock extends AbstractDLock {
     }
 
     /**
+     * Build a {@link JedisConnector} instance for my own use.
+     * 
+     * @return
+     * @since 0.1.1.2
+     */
+    protected abstract JedisConnector buildJedisConnector();
+
+    /**
      * {@inheritDoc}
      */
     @Override
@@ -82,6 +90,11 @@ public abstract class BaseRedisDLock extends AbstractDLock {
         String password = getLockProperty(LOCK_PROP_REDIS_PASSWORD);
         if (!StringUtils.isBlank(password)) {
             this.redisPassword = password;
+        }
+
+        if (jedisConnector == null) {
+            jedisConnector = buildJedisConnector();
+            myOwnRedis = jedisConnector != null;
         }
 
         /*
@@ -109,7 +122,6 @@ public abstract class BaseRedisDLock extends AbstractDLock {
          * Return: (1) nil if lock is currently hold by another client, (2) "1"
          * if successful, (3) "0" if lock is not found
          */
-        // scriptUnlock = "return redis.call(\"ttl\", ARGV[1]);";
         scriptUnlock = "local cval=redis.call(\"get\", ARGV[1]);"
                 + " if cval and cval~=ARGV[2] then return nil"
                 + " else return redis.call(\"del\", ARGV[1]); end";
@@ -122,17 +134,19 @@ public abstract class BaseRedisDLock extends AbstractDLock {
      */
     @Override
     public void destroy() {
-        if (jedisConnector != null && myOwnRedis) {
-            try {
-                jedisConnector.destroy();
-            } catch (Exception e) {
-                LOGGER.warn(e.getMessage(), e);
-            } finally {
-                jedisConnector = null;
+        try {
+            super.destroy();
+        } finally {
+            if (jedisConnector != null && myOwnRedis) {
+                try {
+                    jedisConnector.destroy();
+                } catch (Exception e) {
+                    LOGGER.warn(e.getMessage(), e);
+                } finally {
+                    jedisConnector = null;
+                }
             }
         }
-
-        super.destroy();
     }
 
     protected String getScriptLock() {
