@@ -19,7 +19,7 @@ Third party libraries are distributed under their own licenses.
 
 ## Installation
 
-Latest release version: `c`. See [RELEASE-NOTES.md](RELEASE-NOTES.md).
+Latest release version: `0.1.1.2`. See [RELEASE-NOTES.md](RELEASE-NOTES.md).
 
 Maven dependency: if only a sub-set of `ddth-dlock` functionality is used, choose the corresponding
 dependency artifact(s) to reduce the number of unused jar files.
