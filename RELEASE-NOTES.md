@@ -1,6 +1,6 @@
 # ddth-dlock release notes
 
-## 0.1.1.3 - 2018-06-14
+## 0.1.1.4 - 2018-06-14
 
 - Bug fix: forgot to call `setRedisPassword()` in method `ClusteredRedisDLockFactory.buildJedisConnector()` and `RedisDLockFactory.buildJedisConnector()`.
 
