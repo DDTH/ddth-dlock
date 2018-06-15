@@ -1,5 +1,10 @@
 # ddth-dlock release notes
 
+## 0.1.2 - 2018-06-15
+
+- (Experimental) Add "fairness" support.
+
+
 ## 0.1.1.4 - 2018-06-14
 
 - Bug fix: forgot to call `setRedisPassword()` in method `ClusteredRedisDLockFactory.buildJedisConnector()` and `RedisDLockFactory.buildJedisConnector()`.

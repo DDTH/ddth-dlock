@@ -124,6 +124,16 @@ public class RedisDLockFactory extends BaseRedisDLockFactory {
 
     /**
      * {@inheritDoc}
+     * 
+     * @since 0.1.2
+     */
+    @Override
+    public RedisDLock createLock(String name) {
+        return (RedisDLock) super.createLock(name);
+    }
+
+    /**
+     * {@inheritDoc}
      */
     @Override
     protected RedisDLock createLockInternal(String name, Properties lockProps) {

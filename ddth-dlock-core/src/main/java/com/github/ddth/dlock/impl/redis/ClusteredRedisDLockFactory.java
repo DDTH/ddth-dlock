@@ -112,6 +112,16 @@ public class ClusteredRedisDLockFactory extends BaseRedisDLockFactory {
 
     /**
      * {@inheritDoc}
+     * 
+     * @since 0.1.2
+     */
+    @Override
+    public ClusteredRedisDLock createLock(String name) {
+        return (ClusteredRedisDLock) super.createLock(name);
+    }
+
+    /**
+     * {@inheritDoc}
      */
     @Override
     protected ClusteredRedisDLock createLockInternal(String name, Properties lockProps) {

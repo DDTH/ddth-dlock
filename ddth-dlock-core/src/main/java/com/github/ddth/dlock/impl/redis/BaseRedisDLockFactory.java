@@ -97,4 +97,15 @@ public abstract class BaseRedisDLockFactory extends AbstractDLockFactory {
             }
         }
     }
+
+    /**
+     * {@inheritDoc}
+     * 
+     * @since 0.1.2
+     */
+    @Override
+    public BaseRedisDLock createLock(String name) {
+        return (BaseRedisDLock) super.createLock(name);
+    }
+
 }

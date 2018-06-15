@@ -65,6 +65,53 @@ public interface IDLock {
     LockResult lock(String clientId, long lockDurationMs);
 
     /**
+     * Acquire the lock for {@code clientId} with default duration.
+     * 
+     * <p>
+     * Reentrant: lock can be acquired multiple times by the same
+     * {@code clientId}. Lock's expiry will be extended accordingly.
+     * </p>
+     * 
+     * 
+     * @param waitWeight
+     *            "fairness": {@code clientId} with higher {@code waitWeight}
+     *            value might have higher chance to acquire the lock, negative
+     *            value means "no fairness"
+     * @param clientId
+     *            within a namespace, only one client is allowed to hold lock as
+     *            a given time
+     * @return {@link LockResult#SUCCESSFUL} if successful,
+     *         {@link LockResult#HOLD_BY_ANOTHER_CLIENT} if lock is currently
+     *         hold by another client
+     * @since 0.1.2
+     */
+    LockResult lock(int waitWeight, String clientId);
+
+    /**
+     * Acquire the lock for {@code clientId} for a duration of
+     * {@link lockDurationMs}.
+     * 
+     * <p>
+     * Reentrant: lock can be acquired multiple times by the same
+     * {@code clientId}. Lock's expiry will be extended accordingly.
+     * </p>
+     * 
+     * @param waitWeight
+     *            "fairness": {@code clientId} with higher {@code waitWeight}
+     *            value might have higher chance to acquire the lock, negative
+     *            value means "no fairness"
+     * @param clientId
+     *            within a namespace, only one client is allowed to hold lock as
+     *            a given time
+     * @param lockDurationMs
+     * @return {@link LockResult#SUCCESSFUL} if successful,
+     *         {@link LockResult#HOLD_BY_ANOTHER_CLIENT} if lock is currently
+     *         hold by another client
+     * @since 0.1.2
+     */
+    LockResult lock(int waitWeight, String clientId, long lockDurationMs);
+
+    /**
      * Release the lock.
      * 
      * @param clientId

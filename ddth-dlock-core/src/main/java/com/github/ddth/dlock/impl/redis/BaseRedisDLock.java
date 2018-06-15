@@ -190,4 +190,14 @@ public abstract class BaseRedisDLock extends AbstractDLock {
         }
     }
 
+    /**
+     * Get name of the ZSET to store clientId's score.
+     * 
+     * @return
+     * @since 0.1.2
+     */
+    protected String getZsetName() {
+        return getName() + "-z";
+    }
+
 }

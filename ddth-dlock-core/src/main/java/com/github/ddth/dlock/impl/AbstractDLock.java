@@ -158,6 +158,26 @@ public abstract class AbstractDLock implements IDLock, AutoCloseable {
     /**
      * {@inheritDoc}
      * 
+     * @since 0.1.2
+     */
+    @Override
+    public LockResult lock(int waitWeight, String clientId) {
+        return lock(waitWeight, clientId, DEFAULT_LOCK_DURATION_MS);
+    }
+
+    /**
+     * {@inheritDoc}
+     * 
+     * @since 0.1.2
+     */
+    @Override
+    public LockResult lock(String clientId, long lockDurationMs) {
+        return lock(-1, clientId, lockDurationMs);
+    }
+
+    /**
+     * {@inheritDoc}
+     * 
      * @since 0.1.1
      */
     @Override

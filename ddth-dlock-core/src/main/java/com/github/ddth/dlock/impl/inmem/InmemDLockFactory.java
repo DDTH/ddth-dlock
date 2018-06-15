@@ -16,6 +16,16 @@ public class InmemDLockFactory extends AbstractDLockFactory {
 
     /**
      * {@inheritDoc}
+     * 
+     * @since 0.1.2
+     */
+    @Override
+    public InmemDLock createLock(String name) {
+        return (InmemDLock) super.createLock(name);
+    }
+
+    /**
+     * {@inheritDoc}
      */
     @Override
     protected InmemDLock createLockInternal(String name, Properties lockProps) {

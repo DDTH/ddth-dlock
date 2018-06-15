@@ -95,7 +95,7 @@ public class ClusteredRedisDLock extends BaseRedisDLock {
      * {@inheritDoc}
      */
     @Override
-    public LockResult lock(String clientId, long lockDurationMs) {
+    public LockResult lock(int waitWeight, String clientId, long lockDurationMs) {
         if (StringUtils.isBlank(clientId)) {
             throw new IllegalArgumentException("Invalid ClientID!");
         }
@@ -104,6 +104,14 @@ public class ClusteredRedisDLock extends BaseRedisDLock {
         }
 
         JedisCluster jedis = getJedis();
+        String zsetName = getZsetName();
+        if (waitWeight >= 0) {
+            jedis.zadd(zsetName, waitWeight, clientId);
+            Long rank = jedis.zrevrank(zsetName, clientId);
+            if (rank != null && rank.intValue() != 0) {
+                return LockResult.HOLD_BY_ANOTHER_CLIENT;
+            }
+        }
         String key = getName();
         Object response = jedis.eval(getScriptLock(), 0, key, clientId,
                 String.valueOf(lockDurationMs));
@@ -112,6 +120,9 @@ public class ClusteredRedisDLock extends BaseRedisDLock {
             return LockResult.HOLD_BY_ANOTHER_CLIENT;
         } else {
             updateLockHolder(clientId, lockDurationMs);
+            if (waitWeight >= 0) {
+                jedis.del(zsetName);
+            }
             return LockResult.SUCCESSFUL;
         }
     }
