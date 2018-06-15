@@ -117,7 +117,8 @@ public class RedisDLockFactory extends BaseRedisDLockFactory {
     protected JedisConnector buildJedisConnector() {
         JedisConnector jedisConnector = new JedisConnector();
         jedisConnector.setJedisPoolConfig(JedisUtils.defaultJedisPoolConfig())
-                .setRedisHostsAndPorts(redisHostAndPort).init();
+                .setRedisHostsAndPorts(getRedisHostAndPort()).setRedisPassword(getRedisPassword())
+                .init();
         return jedisConnector;
     }
 

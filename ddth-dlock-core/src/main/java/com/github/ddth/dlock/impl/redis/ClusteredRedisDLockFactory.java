@@ -105,7 +105,8 @@ public class ClusteredRedisDLockFactory extends BaseRedisDLockFactory {
     protected JedisConnector buildJedisConnector() {
         JedisConnector jedisConnector = new JedisConnector();
         jedisConnector.setJedisPoolConfig(JedisUtils.defaultJedisPoolConfig())
-                .setRedisHostsAndPorts(redisHostsAndPorts).init();
+                .setRedisHostsAndPorts(getRedisHostsAndPorts()).setRedisPassword(getRedisPassword())
+                .init();
         return jedisConnector;
     }
 
@@ -116,7 +117,7 @@ public class ClusteredRedisDLockFactory extends BaseRedisDLockFactory {
     protected ClusteredRedisDLock createLockInternal(String name, Properties lockProps) {
         ClusteredRedisDLock lock = new ClusteredRedisDLock(name);
         lock.setLockProperties(lockProps);
-        lock.setRedisHostsAndPorts(redisHostsAndPorts).setRedisPassword(getRedisPassword());
+        lock.setRedisHostsAndPorts(getRedisHostsAndPorts()).setRedisPassword(getRedisPassword());
         lock.setJedisConnector(getJedisConnector());
         return lock;
     }
