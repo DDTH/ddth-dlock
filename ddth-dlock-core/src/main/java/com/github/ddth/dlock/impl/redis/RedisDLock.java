@@ -1,23 +1,20 @@
 package com.github.ddth.dlock.impl.redis;
 
-import org.apache.commons.lang3.StringUtils;
-
 import com.github.ddth.commons.redis.JedisConnector;
 import com.github.ddth.commons.redis.JedisUtils;
 import com.github.ddth.dlock.IDLock;
 import com.github.ddth.dlock.LockResult;
-
+import org.apache.commons.lang3.StringUtils;
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.Protocol;
 
 /**
  * <a href="http://redis.io">Redis</a> implementation of {@link IDLock}.
- * 
+ *
  * @author Thanh Ba Nguyen <btnguyen2k@gmail.com>
  * @since 0.1.0
  */
 public class RedisDLock extends BaseRedisDLock {
-
     /**
      * To override the {@link #setRedisHostAndPort(String)} setting.
      */
@@ -30,15 +27,8 @@ public class RedisDLock extends BaseRedisDLock {
     }
 
     /**
-     * @return
-     */
-    protected Jedis getJedis() {
-        return getJedisConnector().getJedis();
-    }
-
-    /**
      * Redis' host and port scheme (format {@code host:port}).
-     * 
+     *
      * @return
      */
     public String getRedisHostAndPort() {
@@ -46,8 +36,8 @@ public class RedisDLock extends BaseRedisDLock {
     }
 
     /**
-     * Sets Redis' host and port scheme (format {@code host:port}).
-     * 
+     * Redis' host and port scheme (format {@code host:port}).
+     *
      * @param redisHostAndPort
      * @return
      */
@@ -58,14 +48,14 @@ public class RedisDLock extends BaseRedisDLock {
 
     /**
      * {@inheritDocs}
-     * 
+     *
      * @since 0.1.1.2
      */
     @Override
     protected JedisConnector buildJedisConnector() {
         JedisConnector jedisConnector = new JedisConnector();
-        jedisConnector.setJedisPoolConfig(JedisUtils.defaultJedisPoolConfig())
-                .setRedisHostsAndPorts(redisHostAndPort).init();
+        jedisConnector.setJedisPoolConfig(JedisUtils.defaultJedisPoolConfig()).setRedisHostsAndPorts(redisHostAndPort)
+                .init();
         return jedisConnector;
     }
 
@@ -74,7 +64,6 @@ public class RedisDLock extends BaseRedisDLock {
      */
     @Override
     public RedisDLock init() {
-
         /*
          * Parse custom property: redis-host-and-port
          */
@@ -82,10 +71,15 @@ public class RedisDLock extends BaseRedisDLock {
         if (!StringUtils.isBlank(hostAndPort)) {
             this.redisHostAndPort = hostAndPort;
         }
-
         super.init();
-
         return this;
+    }
+
+    /**
+     * @return
+     */
+    protected Jedis getJedis() {
+        return getJedisConnector().getJedis();
     }
 
     /*----------------------------------------------------------------------*/
@@ -96,10 +90,10 @@ public class RedisDLock extends BaseRedisDLock {
     @Override
     public LockResult lock(int waitWeight, String clientId, long lockDurationMs) {
         if (StringUtils.isBlank(clientId)) {
-            throw new IllegalArgumentException("Invalid ClientID!");
+            throw new IllegalArgumentException("Invalid client-id.");
         }
         if (lockDurationMs <= 0) {
-            throw new IllegalArgumentException("Lock duration must be greater than zero!");
+            throw new IllegalArgumentException("Lock duration must be greater than zero.");
         }
         try (Jedis jedis = getJedis()) {
             String zsetName = getZsetName();
@@ -111,8 +105,7 @@ public class RedisDLock extends BaseRedisDLock {
                 }
             }
             String key = getName();
-            Object response = jedis.eval(getScriptLock(), 0, key, clientId,
-                    String.valueOf(lockDurationMs));
+            Object response = jedis.eval(getScriptLock(), 0, key, clientId, String.valueOf(lockDurationMs));
             if (response == null) {
                 updateLockHolder(jedis);
                 return LockResult.HOLD_BY_ANOTHER_CLIENT;
@@ -132,19 +125,10 @@ public class RedisDLock extends BaseRedisDLock {
     @Override
     public LockResult unlock(String clientId) {
         if (StringUtils.isBlank(clientId)) {
-            throw new IllegalArgumentException("Invalid ClientID!");
+            throw new IllegalArgumentException("Invalid client-id.");
         }
         try (Jedis jedis = getJedis()) {
-            String key = getName();
-            Object response = jedis.eval(getScriptUnlock(), 0, key, clientId);
-            if (response == null) {
-                return LockResult.HOLD_BY_ANOTHER_CLIENT;
-            } else if ("0".equals(response.toString())) {
-                return LockResult.NOT_FOUND;
-            } else {
-                return LockResult.SUCCESSFUL;
-            }
+            return unlockResult(jedis.eval(getScriptUnlock(), 0, getName(), clientId));
         }
     }
-
 }

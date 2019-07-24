@@ -7,7 +7,7 @@ import com.github.ddth.dlock.impl.redis.RedisDLock;
 
 import java.util.Random;
 
-public class QndRedisDLockMT {
+public class QndRedisDLockMT2 {
     static Random RAND = new Random(System.currentTimeMillis());
 
     static class MyRedisDLock extends RedisDLock {
@@ -57,10 +57,11 @@ public class QndRedisDLockMT {
     public static void main(String[] args) {
         String lockName = "demo";
         String redisHostAndPort = "localhost:6379";
-        RedisDLock lock = new MyRedisDLock(lockName).setRedisHostAndPort(redisHostAndPort).init();
-        ((MyRedisDLock) lock).flush();
-        Thread t1 = new MyThread("Worker1", lock);
-        Thread t2 = new MyThread("Worker2", lock);
+        RedisDLock lock1 = new MyRedisDLock(lockName).setRedisHostAndPort(redisHostAndPort).init();
+        RedisDLock lock2 = new MyRedisDLock(lockName).setRedisHostAndPort(redisHostAndPort).init();
+        ((MyRedisDLock) lock1).flush();
+        Thread t1 = new MyThread("Worker1", lock1);
+        Thread t2 = new MyThread("Worker2", lock2);
         t1.start();
         t2.start();
     }

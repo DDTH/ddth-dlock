@@ -1,18 +1,20 @@
 package com.github.ddth.dlock.qnd;
 
-import java.util.concurrent.atomic.AtomicLong;
-import java.util.concurrent.atomic.AtomicLongArray;
-
 import com.github.ddth.dlock.IDLock;
 import com.github.ddth.dlock.LockResult;
 import com.github.ddth.dlock.impl.inmem.InmemDLock;
 import com.google.common.util.concurrent.AtomicDoubleArray;
 
+import java.util.Random;
+import java.util.concurrent.atomic.AtomicLong;
+import java.util.concurrent.atomic.AtomicLongArray;
+
 public class QndInmemDLockMTFair {
+    static Random RAND = new Random(System.currentTimeMillis());
 
     static class MyThread extends Thread {
         private IDLock dlock;
-        private AtomicLong counter = new AtomicLong();
+        private AtomicLong counter;
         private AtomicLongArray hit;
         private int threadIndex;
 
@@ -28,7 +30,8 @@ public class QndInmemDLockMTFair {
             String threadName = getName();
             int waitWeight = 0;
             while (!isInterrupted()) {
-                LockResult result = dlock.lock(waitWeight, threadName, 10000);
+                long sleepTimeMs = RAND.nextInt(1000) + 1;
+                LockResult result = dlock.lock(waitWeight, threadName, RAND.nextInt(10000) + 1);
                 if (result == LockResult.SUCCESSFUL) {
                     hit.incrementAndGet(threadIndex);
                     long numTotal = counter.incrementAndGet();
@@ -37,15 +40,17 @@ public class QndInmemDLockMTFair {
                         double d = hit.get(i) * 100.0 / numTotal;
                         rate.set(i, Math.round(d * 10.0) / 10.0);
                     }
-                    System.out.println(getName() + ": I got the lock! [" + threadName + "] / "
-                            + numTotal + " / " + hit + "  / " + rate);
-                    waitWeight = 0;
+                    System.out.println(
+                            getName() + ": I got the lock / Total: " + numTotal + " / Hits: " + hit + "  / Rates: "
+                                    + rate);
+                    waitWeight = 0; //reset wait weight
                 } else {
-                    counter.incrementAndGet();
+                    //counter.incrementAndGet();
+                    //waitWeight += sleepTimeMs;
                     waitWeight++;
                 }
                 try {
-                    Thread.sleep(1000);
+                    Thread.sleep(sleepTimeMs);
                 } catch (InterruptedException e) {
                 }
                 if (result == LockResult.SUCCESSFUL) {
@@ -55,7 +60,7 @@ public class QndInmemDLockMTFair {
         }
     }
 
-    public static void main(String[] args) throws Exception {
+    public static void main(String[] args) {
         final int numThreads = 4;
         final InmemDLock lock = new InmemDLock("demo");
         lock.init();
@@ -69,5 +74,4 @@ public class QndInmemDLockMTFair {
             THREADS[i].start();
         }
     }
-
 }

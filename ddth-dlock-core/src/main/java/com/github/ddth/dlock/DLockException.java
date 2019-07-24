@@ -3,7 +3,7 @@ package com.github.ddth.dlock;
 /**
  * Throws to indicate there has been an exception while interacting with the
  * underlying system.
- * 
+ *
  * @author Thanh Ba Nguyen <bnguyen2k@gmail.com>
  * @since 0.1.0
  */
@@ -30,7 +30,7 @@ public class DLockException extends RuntimeException {
 
     /**
      * Throws to indicate that the operation is not supported/allowed.
-     * 
+     *
      * @author Thanh Ba Nguyen <bnguyen2k@gmail.com>
      * @since 0.1.0
      */

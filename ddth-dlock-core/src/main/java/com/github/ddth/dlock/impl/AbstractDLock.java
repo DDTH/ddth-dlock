@@ -1,16 +1,15 @@
 package com.github.ddth.dlock.impl;
 
-import java.util.Properties;
-
+import com.github.ddth.dlock.IDLock;
+import com.github.ddth.dlock.LockResult;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 
-import com.github.ddth.dlock.IDLock;
-import com.github.ddth.dlock.LockResult;
+import java.util.Properties;
 
 /**
  * Abstract implementation of {@link IDLock}.
- * 
+ *
  * @author Thanh Ba Nguyen <btnguyen2k@gmail.com>
  * @since 0.1.0
  */
@@ -39,23 +38,23 @@ public abstract class AbstractDLock implements IDLock, AutoCloseable {
 
     /**
      * Update current lock's holder info.
-     * 
+     *
      * @param clientId
      * @param lockDurationMs
      * @since 0.1.1
      */
     protected void updateLockHolder(String clientId, long lockDurationMs) {
-        this.clientId = clientId;
-        this.timestampExpiry = System.currentTimeMillis() + lockDurationMs;
+        setClientId(clientId);
+        setTimestampExpiry(System.currentTimeMillis() + lockDurationMs);
     }
 
     /**
      * Get client-id who is currently holding the lock.
-     * 
+     *
      * <p>
      * Note: value returned from this method is "estimated".
      * </p>
-     * 
+     *
      * @return
      * @since 0.1.1
      */
@@ -65,7 +64,7 @@ public abstract class AbstractDLock implements IDLock, AutoCloseable {
 
     /**
      * Get client-id who is currently holding the lock.
-     * 
+     *
      * @param clientId
      * @return
      * @since 0.1.1
@@ -77,11 +76,11 @@ public abstract class AbstractDLock implements IDLock, AutoCloseable {
 
     /**
      * Get timestamp (in milliseconds) when the lock-acquisition expires.
-     * 
+     *
      * <p>
      * Note: value returned from this method is "estimated".
      * </p>
-     * 
+     *
      * @return
      * @since 0.1.1
      */
@@ -91,7 +90,7 @@ public abstract class AbstractDLock implements IDLock, AutoCloseable {
 
     /**
      * Get timestamp (in milliseconds) when the lock-acquisition expires.
-     * 
+     *
      * @param timestampExpiry
      * @return
      * @since 0.1.1
@@ -103,7 +102,7 @@ public abstract class AbstractDLock implements IDLock, AutoCloseable {
 
     /**
      * Lock's custom properties.
-     * 
+     *
      * @param lockProps
      * @return
      */
@@ -114,7 +113,7 @@ public abstract class AbstractDLock implements IDLock, AutoCloseable {
 
     /**
      * Get lock's custom properties.
-     * 
+     *
      * @return
      */
     protected Properties getLockProperties() {
@@ -123,7 +122,7 @@ public abstract class AbstractDLock implements IDLock, AutoCloseable {
 
     /**
      * Get lock's custom property.
-     * 
+     *
      * @param key
      * @return
      */
@@ -131,10 +130,18 @@ public abstract class AbstractDLock implements IDLock, AutoCloseable {
         return lockProps != null ? lockProps.getProperty(key) : null;
     }
 
+    /**
+     * Init method.
+     *
+     * @return
+     */
     public AbstractDLock init() {
         return this;
     }
 
+    /**
+     * Cleanup method.
+     */
     public void destroy() {
         // EMPTY
     }
@@ -157,7 +164,7 @@ public abstract class AbstractDLock implements IDLock, AutoCloseable {
 
     /**
      * {@inheritDoc}
-     * 
+     *
      * @since 0.1.2
      */
     @Override
@@ -167,7 +174,7 @@ public abstract class AbstractDLock implements IDLock, AutoCloseable {
 
     /**
      * {@inheritDoc}
-     * 
+     *
      * @since 0.1.2
      */
     @Override
@@ -177,7 +184,7 @@ public abstract class AbstractDLock implements IDLock, AutoCloseable {
 
     /**
      * {@inheritDoc}
-     * 
+     *
      * @since 0.1.1
      */
     @Override

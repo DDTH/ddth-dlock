@@ -9,7 +9,7 @@ import java.util.Random;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicLongArray;
 
-public class QndRedisDLockMTFair {
+public class QndRedisDLockMTFairN {
     static Random RAND = new Random(System.currentTimeMillis());
 
     static class MyRedisDLock extends RedisDLock {
@@ -71,21 +71,23 @@ public class QndRedisDLockMTFair {
         }
     }
 
-    @SuppressWarnings("resource")
     public static void main(String[] args) {
         final int numThreads = 4;
 
+        final IDLock[] LOCKS = new IDLock[numThreads];
         String lockName = "demo";
         String redisHostAndPort = "localhost:6379";
-        RedisDLock lock = new MyRedisDLock(lockName).setRedisHostAndPort(redisHostAndPort).init();
-        ((MyRedisDLock) lock).flush();
+        for (int i = 0; i < numThreads; i++) {
+            RedisDLock lock = new MyRedisDLock(lockName).setRedisHostAndPort(redisHostAndPort).init();
+            ((MyRedisDLock) lock).flush();
+            LOCKS[i] = lock;
+        }
 
         final AtomicLongArray hit = new AtomicLongArray(numThreads);
         final AtomicLong counter = new AtomicLong();
-
         final Thread[] THREADS = new Thread[numThreads];
         for (int i = 0; i < numThreads; i++) {
-            THREADS[i] = new MyThread(i, lock, hit, counter);
+            THREADS[i] = new MyThread(i, LOCKS[i], hit, counter);
         }
         for (int i = 0; i < numThreads; i++) {
             THREADS[i].start();

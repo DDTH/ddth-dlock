@@ -1,24 +1,26 @@
 package com.github.ddth.dlock.impl.redis;
 
+import com.github.ddth.commons.redis.JedisConnector;
+import com.github.ddth.dlock.IDLock;
+import com.github.ddth.dlock.LockResult;
+import com.github.ddth.dlock.impl.AbstractDLock;
+import com.github.ddth.dlock.impl.redis.internal.RedisUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import redis.clients.jedis.commands.JedisClusterCommands;
+import redis.clients.jedis.commands.JedisCommands;
 
-import com.github.ddth.commons.redis.JedisConnector;
-import com.github.ddth.dlock.IDLock;
-import com.github.ddth.dlock.impl.AbstractDLock;
-
-import redis.clients.jedis.JedisCommands;
+import java.util.function.Function;
 
 /**
  * Base class for <a href="http://redis.io">Redis</a>-based implementations of
  * {@link IDLock}.
- * 
+ *
  * @author Thanh Ba Nguyen <btnguyen2k@gmail.com>
  * @since 0.1.0
  */
 public abstract class BaseRedisDLock extends AbstractDLock {
-
     private final Logger LOGGER = LoggerFactory.getLogger(BaseRedisDLock.class);
 
     /**
@@ -60,10 +62,21 @@ public abstract class BaseRedisDLock extends AbstractDLock {
         return this;
     }
 
+    /**
+     * Password to connect to Redis server/cluster.
+     *
+     * @return
+     */
     public String getRedisPassword() {
         return redisPassword;
     }
 
+    /**
+     * Password to connect to Redis server/cluster.
+     *
+     * @param redisPassword
+     * @return
+     */
     public BaseRedisDLock setRedisPassword(String redisPassword) {
         this.redisPassword = redisPassword;
         return this;
@@ -71,7 +84,7 @@ public abstract class BaseRedisDLock extends AbstractDLock {
 
     /**
      * Build a {@link JedisConnector} instance for my own use.
-     * 
+     *
      * @return
      * @since 0.1.1.2
      */
@@ -98,32 +111,30 @@ public abstract class BaseRedisDLock extends AbstractDLock {
         }
 
         /*
-         * Implementation: firstly get the current client-id value; if not null
-         * AND not equal to the supplied-client-id then return nil, otherwise
-         * write the supplied-client-id.
-         * 
+         * Implementation: get the current client-id value; if not null
+         * AND not equal to the supplied-client-id then return nil (a),
+         * otherwise write the supplied-client-id (b).
+         *
          * Parameters: (1) key name, (2) supplied-client-id, (3) TTL in
          * milliseconds.
-         * 
-         * Return: (1) nil if lock is currently hold by another client, (2)
-         * non-nil if successful.
+         *
+         * Return: (a) nil if lock is currently hold by another client,
+         * (b) non-nil if successful.
          */
-        scriptLock = "local cval=redis.call(\"get\", ARGV[1]);"
-                + " if cval and cval~=ARGV[2] then return nil"
+        scriptLock = "local cval=redis.call(\"get\", ARGV[1]);" + " if cval and cval~=ARGV[2] then return nil"
                 + " else return redis.call(\"set\", ARGV[1], ARGV[2], \"PX\", ARGV[3]); end";
 
         /*
-         * Implementation: firstly get the current client-id value; if not null
-         * AND not equal to the supplied-client-id then return nil, otherwise
-         * delete the key.
-         * 
+         * Implementation: get the current client-id value; if not null
+         * AND not equal to the supplied-client-id then return nil (a), otherwise
+         * delete the key (b).
+         *
          * Parameters: (1) key name, (2) supplied-client-id.
-         * 
-         * Return: (1) nil if lock is currently hold by another client, (2) "1"
-         * if successful, (3) "0" if lock is not found
+         *
+         * Return: (a) nil if lock is currently hold by another client,
+         * (b) "1" if successful, (3) "0" if lock is not found
          */
-        scriptUnlock = "local cval=redis.call(\"get\", ARGV[1]);"
-                + " if cval and cval~=ARGV[2] then return nil"
+        scriptUnlock = "local cval=redis.call(\"get\", ARGV[1]);" + " if cval and cval~=ARGV[2] then return nil"
                 + " else return redis.call(\"del\", ARGV[1]); end";
 
         return this;
@@ -137,14 +148,10 @@ public abstract class BaseRedisDLock extends AbstractDLock {
         try {
             super.destroy();
         } finally {
-            if (jedisConnector != null && myOwnRedis) {
-                try {
-                    jedisConnector.destroy();
-                } catch (Exception e) {
-                    LOGGER.warn(e.getMessage(), e);
-                } finally {
-                    jedisConnector = null;
-                }
+            try {
+                jedisConnector = RedisUtils.closeJedisConnector(jedisConnector, myOwnRedis);
+            } catch (Exception e) {
+                LOGGER.warn(e.getMessage(), e);
             }
         }
     }
@@ -167,21 +174,16 @@ public abstract class BaseRedisDLock extends AbstractDLock {
         return this;
     }
 
-    /**
-     * Update current lock's holder info.
-     * 
-     * @param jedisCommands
-     * @since 0.1.1
-     */
-    protected void updateLockHolder(JedisCommands jedisCommands) {
+    private void doUpdateLockHolder(Function<String, String> funcGetClientIdFromRedis,
+            Function<String, Long> funcGetTtlFromRedis) {
         String key = getName();
-        String clientId = jedisCommands.get(key);
+        String clientId = funcGetClientIdFromRedis.apply(key);
         setClientId(clientId);
         if (!StringUtils.isBlank(clientId)) {
-            Long ttl = jedisCommands.pttl(key);
+            Long ttl = funcGetTtlFromRedis.apply(key);
             if (ttl != null && ttl.longValue() != -2) {
-                setTimestampExpiry(ttl.longValue() != -1
-                        ? System.currentTimeMillis() + ttl.longValue() : Integer.MAX_VALUE);
+                setTimestampExpiry(
+                        ttl.longValue() != -1 ? System.currentTimeMillis() + ttl.longValue() : Integer.MAX_VALUE);
             } else {
                 setTimestampExpiry(Integer.MAX_VALUE);
             }
@@ -191,8 +193,28 @@ public abstract class BaseRedisDLock extends AbstractDLock {
     }
 
     /**
+     * Update current lock's holder info.
+     *
+     * @param jedisClusterCommands
+     * @since 1.0.0
+     */
+    protected void updateLockHolder(JedisClusterCommands jedisClusterCommands) {
+        doUpdateLockHolder(jedisClusterCommands::get, jedisClusterCommands::pttl);
+    }
+
+    /**
+     * Update current lock's holder info.
+     *
+     * @param jedisCommands
+     * @since 0.1.1
+     */
+    protected void updateLockHolder(JedisCommands jedisCommands) {
+        doUpdateLockHolder(jedisCommands::get, jedisCommands::pttl);
+    }
+
+    /**
      * Get name of the ZSET to store clientId's score.
-     * 
+     *
      * @return
      * @since 0.1.2
      */
@@ -200,4 +222,20 @@ public abstract class BaseRedisDLock extends AbstractDLock {
         return getName() + "-z";
     }
 
+    /**
+     * Convenient method to build result for {@link #unlock(String)}} method with result from Redis server.
+     *
+     * @param response
+     * @return
+     * @since 1.0.0
+     */
+    protected LockResult unlockResult(Object response) {
+        if (response == null) {
+            return LockResult.HOLD_BY_ANOTHER_CLIENT;
+        } else if ("0".equals(response.toString())) {
+            return LockResult.NOT_FOUND;
+        } else {
+            return LockResult.SUCCESSFUL;
+        }
+    }
 }

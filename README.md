@@ -1,4 +1,4 @@
-[![Build Status](https://travis-ci.org/DDTH/ddth-dlock.svg?branch=master)](https://travis-ci.org/DDTH/ddth-dlock)
+[![Build Status](https://travis-ci.org/DDTH/ddth-dlock.svg?branch=master)](https://travis-ci.org/DDTH/ddth-dlock) [![Javadocs](http://javadoc.io/badge/com.github.ddth/ddth-dlock-core.svg)](http://javadoc.io/doc/com.github.ddth/ddth-dlock-core)
 
 # ddth-dlock
 
@@ -7,30 +7,22 @@ DDTH's Distributed Lock library.
 Project home:
 [https://github.com/DDTH/ddth-dlock](https://github.com/DDTH/ddth-dlock)
 
-**`ddth-dlock` requires Java 8+**
-
-
-## License
-
-See LICENSE.txt for details. Copyright (c) 2018 Thanh Ba Nguyen.
-
-Third party libraries are distributed under their own licenses.
-
+`ddth-queue` requires Java 11+ since v1.0.0. For Java 8, use v0.1.x
 
 ## Installation
 
-Latest release version: `0.1.2`. See [RELEASE-NOTES.md](RELEASE-NOTES.md).
+Latest release version: `1.0.0`. See [RELEASE-NOTES.md](RELEASE-NOTES.md).
 
 Maven dependency: if only a sub-set of `ddth-dlock` functionality is used, choose the corresponding
 dependency artifact(s) to reduce the number of unused jar files.
 
-*ddth-dlock-core*: in-memory caches, all other dependencies are *optional*.
+*ddth-dlock-core*: in-memory lock, all other dependencies are *optional*.
 
 ```xml
 <dependency>
 	<groupId>com.github.ddth</groupId>
 	<artifactId>ddth-dlock-core</artifactId>
-	<version>0.1.2</version>
+	<version>1.0.0</version>
 </dependency>
 ```
 
@@ -40,11 +32,10 @@ dependency artifact(s) to reduce the number of unused jar files.
 <dependency>
     <groupId>com.github.ddth</groupId>
     <artifactId>ddth-dlock-redis</artifactId>
-    <version>0.1.2</version>
+    <version>1.0.0</version>
     <type>pom</type>
 </dependency>
 ```
-
 
 ## Usage
 
@@ -120,7 +111,7 @@ Custom properties for `RedisDLock`:
 IDLock lock = factory.createLock("my-lock-name");
 
 //lock with default duration
-if ( lock.lock("my-client-id")==LockResult.SUCCESSFUL ) {
+if (lock.lock("my-client-id") == LockResult.SUCCESSFUL) {
     try {
         //I now acquire the lock
     } finally {
@@ -131,7 +122,7 @@ if ( lock.lock("my-client-id")==LockResult.SUCCESSFUL ) {
 }
 
 //lock for 10 seconds
-if ( lock.lock("my-client-id", 10000)==LockResult.SUCCESSFUL ) {
+if (lock.lock("my-client-id", 10000) == LockResult.SUCCESSFUL) {
     try {
         //I now acquire the lock
     } finally {
@@ -147,3 +138,9 @@ if ( lock.lock("my-client-id", 10000)==LockResult.SUCCESSFUL ) {
 ```java
 ((AbstractDLockFactory)factory).destroy();
 ```
+
+## License
+
+See LICENSE.txt for details. Copyright (c) 2018-2019 Thanh Ba Nguyen.
+
+Third party libraries are distributed under their own licenses.

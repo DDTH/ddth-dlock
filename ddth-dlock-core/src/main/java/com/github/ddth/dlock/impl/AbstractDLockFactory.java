@@ -1,25 +1,22 @@
 package com.github.ddth.dlock.impl;
 
-import java.util.Map;
-import java.util.Properties;
-import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeUnit;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.github.ddth.dlock.IDLock;
 import com.github.ddth.dlock.IDLockFactory;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.RemovalListener;
-import com.google.common.cache.RemovalNotification;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.util.Map;
+import java.util.Properties;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Abstract implementation of {@link IDLockFactory} that creates
  * {@link AbstractDLock} instances.
- * 
+ *
  * @author Thanh Ba Nguyen <btnguyen2k@gmail.com>
  * @since 0.1.0
  */
@@ -32,15 +29,12 @@ public abstract class AbstractDLockFactory implements IDLockFactory, AutoCloseab
     private Map<String, Properties> lockProperties;
     private Cache<String, AbstractDLock> lockInstances = CacheBuilder.newBuilder()
             .expireAfterAccess(3600, TimeUnit.SECONDS)
-            .removalListener(new RemovalListener<String, AbstractDLock>() {
-                @Override
-                public void onRemoval(RemovalNotification<String, AbstractDLock> notification) {
-                    AbstractDLock lock = notification.getValue();
-                    try {
-                        lock.destroy();
-                    } catch (Exception e) {
-                        LOGGER.warn(e.getMessage(), e);
-                    }
+            .removalListener((RemovalListener<String, AbstractDLock>) notification -> {
+                AbstractDLock lock = notification.getValue();
+                try {
+                    lock.destroy();
+                } catch (Exception e) {
+                    LOGGER.warn(e.getMessage(), e);
                 }
             }).build();
 
@@ -62,7 +56,7 @@ public abstract class AbstractDLockFactory implements IDLockFactory, AutoCloseab
     /**
      * Prefix {@link #lockNamePrefix} to {@code lockName} if
      * {@link #lockNamePrefix} is not null.
-     * 
+     *
      * @param lockName
      * @return
      */
@@ -76,7 +70,7 @@ public abstract class AbstractDLockFactory implements IDLockFactory, AutoCloseab
 
     /**
      * Name of locks created by this factory will be prefixed by this string.
-     * 
+     *
      * @param lockNamePrefix
      * @return
      */
@@ -92,7 +86,7 @@ public abstract class AbstractDLockFactory implements IDLockFactory, AutoCloseab
 
     /**
      * Get all locks properties settings.
-     * 
+     *
      * @return
      */
     protected Map<String, Properties> getLockPropertiesMap() {
@@ -100,8 +94,8 @@ public abstract class AbstractDLockFactory implements IDLockFactory, AutoCloseab
     }
 
     /**
-     * Get a lock's properties
-     * 
+     * Get a lock's properties.
+     *
      * @param name
      * @return
      */
@@ -116,24 +110,19 @@ public abstract class AbstractDLockFactory implements IDLockFactory, AutoCloseab
     public AbstractDLock createLock(String name) {
         String lockName = buildLockName(name);
         try {
-            AbstractDLock lock = lockInstances.get(lockName, new Callable<AbstractDLock>() {
-                @Override
-                public AbstractDLock call() throws Exception {
-                    // yup, use "name" here (not "lockName) is correct and
-                    // intended!
-                    Properties lockProps = getLockProperties(name);
-                    return createAndInitLockInstance(lockName, lockProps);
-                }
+            AbstractDLock lock = lockInstances.get(lockName, () -> {
+                Properties lockProps = getLockProperties(name); // use "name" here (not "lockName)
+                return createAndInitLockInstance(lockName, lockProps);
             });
             return lock;
         } catch (ExecutionException e) {
-            throw new RuntimeException(e);
+            throw new RuntimeException(e.getCause());
         }
     }
 
     /**
      * Create and initializes an {@link IDLock} instance, ready for use.
-     * 
+     *
      * @param name
      * @param lockProps
      * @return
@@ -147,7 +136,7 @@ public abstract class AbstractDLockFactory implements IDLockFactory, AutoCloseab
     /**
      * Create a new lock instance, but does not initialize it. Convenient method
      * for sub-class to override.
-     * 
+     *
      * @param name
      * @param lockProps
      * @return

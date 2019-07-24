@@ -3,23 +3,12 @@ package com.github.ddth.dlock.qnd;
 import com.github.ddth.commons.utils.IdGenerator;
 import com.github.ddth.dlock.IDLock;
 import com.github.ddth.dlock.LockResult;
-import com.github.ddth.dlock.impl.redis.RedisDLock;
+import com.github.ddth.dlock.impl.inmem.InmemDLock;
 
 import java.util.Random;
 
-public class QndRedisDLockMT {
+public class QndInmemDLockMT {
     static Random RAND = new Random(System.currentTimeMillis());
-
-    static class MyRedisDLock extends RedisDLock {
-        public MyRedisDLock(String name) {
-            super(name);
-        }
-
-        public MyRedisDLock flush() {
-            getJedis().flushAll();
-            return this;
-        }
-    }
 
     static class MyThread extends Thread {
         private String name;
@@ -56,9 +45,7 @@ public class QndRedisDLockMT {
 
     public static void main(String[] args) {
         String lockName = "demo";
-        String redisHostAndPort = "localhost:6379";
-        RedisDLock lock = new MyRedisDLock(lockName).setRedisHostAndPort(redisHostAndPort).init();
-        ((MyRedisDLock) lock).flush();
+        IDLock lock = new InmemDLock(lockName).init();
         Thread t1 = new MyThread("Worker1", lock);
         Thread t2 = new MyThread("Worker2", lock);
         t1.start();
